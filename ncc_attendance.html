@@ -820,46 +820,6 @@ header{
   }
 }
 
-
-/* ── Footer ── */
-.site-footer {
-  position: relative; z-index: 1;
-  text-align: center;
-  padding: 0 20px 44px;
-  margin-top: -70px;
-}
-.site-footer .ft-inner {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.site-footer .ft-inner > * {
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--t3);
-  letter-spacing: .2px;
-  line-height: 1;
-  white-space: nowrap;
-}
-.site-footer .ft-sep {
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: var(--t3);
-  flex-shrink: 0;
-  opacity: .5;
-  align-self: center;
-}
-.site-footer a {
-  color: var(--t3);
-  text-decoration: none;
-  transition: color .3s var(--smooth);
-}
-.site-footer a:hover {
-  color: var(--violet-lt);
-}
 </style>
 </head>
 <body>
@@ -1223,16 +1183,5 @@ document.getElementById('generateBtn').addEventListener('click',()=>{
   box.classList.add('has-content');
 });
 </script>
-
-<!-- Footer -->
-<footer class="site-footer">
-  <div class="ft-inner">
-    <span class="ft-name">© 2026 Satyam</span>
-    <span class="ft-sep"></span>
-    <span class="ft-note">Built for DITU NCC · 29 UK Battalion</span>
-    <span class="ft-sep"></span>
-    <a href="https://github.com/satyam-64136" target="_blank" rel="noopener">github.com/satyam-64136</a>
-  </div>
-</footer>
 </body>
 </html>
