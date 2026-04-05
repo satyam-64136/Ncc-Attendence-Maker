@@ -272,7 +272,7 @@ header{
   padding:20px 24px;
   margin-bottom:18px;
   display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-  position:relative;overflow:hidden;
+  position:relative;
 }
 .session-panel::after{
   content:'';position:absolute;
@@ -286,40 +286,7 @@ header{
   letter-spacing:2px;color:var(--t3);flex-shrink:0;
 }
 
-.sel-shell{position:relative;flex:1;min-width:130px;}
-.sel-shell::after{
-  content:'';position:absolute;right:13px;top:50%;
-  transform:translateY(-50%);pointer-events:none;
-  border-left:4px solid transparent;
-  border-right:4px solid transparent;
-  border-top:5px solid var(--violet-lt);
-}
-
-.session-select{
-  width:100%;
-  background:rgba(124,58,237,.1);
-  border:1px solid rgba(124,58,237,.28);
-  border-radius:var(--r-md);
-  padding:9px 34px 9px 14px;
-  font-family:'Syne',sans-serif;
-  font-size:13px;font-weight:600;
-  color:var(--violet-lt);
-  cursor:pointer;appearance:none;-webkit-appearance:none;
-  transition:border-color .25s var(--smooth),box-shadow .3s var(--ease),background .25s var(--smooth);
-}
-.session-select:focus{
-  outline:none;
-  border-color:var(--violet);
-  box-shadow:0 0 0 3px var(--violet-dim);
-  background:rgba(124,58,237,.16);
-}
-.session-select option{background:#0d1028;color:#f0f0f8;}
-[data-theme="light"] .session-select option{background:#fff;color:#12153a;}
-[data-theme="light"] .session-select{
-  background:rgba(109,40,217,.07);
-  border-color:rgba(109,40,217,.22);
-  color:#6d28d9;
-}
+/* custom dropdowns injected below */
 
 .sp-hint{
   flex-basis:100%;margin-top:-4px;
@@ -414,7 +381,7 @@ header{
 .cadet-card{
   padding:15px 20px;
   border-radius:var(--r-lg);
-  position:relative;overflow:hidden;
+  position:relative;
   transition:transform .32s var(--spring),box-shadow .32s var(--ease),border-color .32s var(--smooth),background .32s var(--smooth);
   will-change:transform;
 }
@@ -519,9 +486,10 @@ header{
     0 0 8px var(--teal-glow),
     inset 0 1px 0 rgba(255,255,255,.9);
 }
-.sw:active .sw input:checked~.sw-dot,
-.sw input:checked~.sw-dot:active{
+/* When checked toggle is actively pressed, compress from translated position */
+.sw:has(input:checked):active .sw-dot{
   transform:translateX(18px) scaleX(1.25);
+  transition:transform .12s var(--snap),box-shadow .15s;
 }
 
 /* Absent reason */
@@ -540,25 +508,7 @@ header{
   font-size:9.5px;font-weight:700;text-transform:uppercase;
   letter-spacing:1.5px;color:var(--t3);flex-shrink:0;
 }
-.reason-sel{
-  flex:1;
-  background:rgba(225,29,72,.09);
-  border:1px solid rgba(225,29,72,.22);
-  border-radius:var(--r-sm);
-  padding:7px 12px;
-  font-family:'Syne',sans-serif;
-  font-size:12px;font-weight:600;color:var(--t1);
-  cursor:pointer;appearance:none;-webkit-appearance:none;
-  transition:border-color .28s var(--smooth),box-shadow .3s var(--ease),background .28s var(--smooth);
-}
-.reason-sel:focus{
-  outline:none;
-  border-color:var(--crimson);
-  box-shadow:0 0 0 3px var(--crimson-dim);
-}
-.reason-sel option{background:#0d1028;}
-[data-theme="light"] .reason-sel option{background:#fff;}
-[data-theme="light"] .reason-sel{background:rgba(225,29,72,.05);color:#12153a;}
+/* reason dropdown via .cdd-reason */
 
 /* ─────────────────────────────────────────────
    BUTTONS
@@ -757,17 +707,11 @@ header{
 .preview-wrap       { animation-delay:.42s; }
 
 /* Cadet card entrance — triggered by JS class .card-in */
-.cadet-card{
+.cadets-list .cadet-card{
   opacity:0;
   transform:translateY(12px);
-  transition:
-    opacity .35s var(--ease),
-    transform .38s var(--spring),
-    box-shadow .32s var(--ease),
-    border-color .32s var(--smooth),
-    background .32s var(--smooth);
 }
-.cadet-card.card-in{
+.cadets-list .cadet-card.card-in{
   opacity:1;
   transform:translateY(0);
 }
@@ -787,6 +731,69 @@ header{
     background .28s var(--smooth),
     color .25s var(--smooth);
 }
+
+/* ── Custom dropdown (shared base) ── */
+.cdd{position:relative;flex:1;min-width:130px;user-select:none;}
+.cdd-trigger{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  border-radius:var(--r-md);padding:9px 14px;
+  cursor:pointer;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:600;
+  transition:border-color .25s var(--smooth),box-shadow .3s var(--ease),background .25s var(--smooth);
+}
+.cdd-arrow{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .28s var(--ease);}
+.cdd-arrow svg{display:block;}
+.cdd.open .cdd-arrow{transform:rotate(180deg);}
+.cdd-menu{
+  position:fixed;z-index:9999;
+  min-width:160px;
+  border-radius:var(--r-md);overflow:hidden;border:1px solid;
+  backdrop-filter:blur(24px) saturate(160%);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  box-shadow:0 8px 32px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.3);
+  opacity:0;pointer-events:none;
+  transform:translateY(-6px) scale(.98);
+  transition:opacity .22s var(--ease),transform .25s var(--spring);
+}
+.cdd-menu.menu-open{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+.cdd-opt{
+  padding:10px 14px;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  transition:background .18s var(--smooth);
+}
+.cdd-opt .cdd-check{width:14px;height:14px;flex-shrink:0;opacity:0;transition:opacity .15s;}
+.cdd-opt.selected .cdd-check{opacity:1;}
+
+/* Session (violet) */
+.cdd-session .cdd-trigger{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);color:var(--violet-lt);}
+.cdd-session .cdd-trigger:hover,.cdd-session.open .cdd-trigger{background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.5);box-shadow:0 0 0 3px var(--violet-dim);}
+.cdd-menu.is-session{background:rgba(13,16,40,.97);border-color:rgba(124,58,237,.35);}
+.cdd-menu.is-session .cdd-opt{color:var(--t2);}
+.cdd-menu.is-session .cdd-opt:hover{background:rgba(124,58,237,.18);color:var(--violet-lt);}
+.cdd-menu.is-session .cdd-opt.selected{color:var(--violet-lt);}
+[data-theme="light"] .cdd-session .cdd-trigger{background:rgba(109,40,217,.07);border-color:rgba(109,40,217,.22);color:#6d28d9;}
+:root[data-theme="light"] .cdd-menu.is-session{background:rgba(245,244,255,.99);border-color:rgba(124,58,237,.2);}
+:root[data-theme="light"] .cdd-menu.is-session .cdd-opt{color:#555a80;}
+:root[data-theme="light"] .cdd-menu.is-session .cdd-opt:hover{background:rgba(124,58,237,.1);color:#6d28d9;}
+:root[data-theme="light"] .cdd-menu.is-session .cdd-opt.selected{color:#6d28d9;}
+
+/* Reason (crimson) */
+.cdd-reason .cdd-trigger{background:rgba(225,29,72,.1);border:1px solid rgba(225,29,72,.28);color:var(--t1);}
+.cdd-reason .cdd-trigger:hover,.cdd-reason.open .cdd-trigger{background:rgba(225,29,72,.18);border-color:rgba(225,29,72,.5);box-shadow:0 0 0 3px var(--crimson-dim);}
+.cdd-menu.is-reason{background:rgba(13,16,40,.97);border-color:rgba(225,29,72,.3);}
+.cdd-menu.is-reason .cdd-opt{color:var(--t2);}
+.cdd-menu.is-reason .cdd-opt:hover{background:rgba(225,29,72,.14);color:#fca5a5;}
+.cdd-menu.is-reason .cdd-opt.selected{color:var(--t1);}
+[data-theme="light"] .cdd-reason .cdd-trigger{background:rgba(225,29,72,.07);border-color:rgba(225,29,72,.22);color:#be123c;}
+:root[data-theme="light"] .cdd-menu.is-reason{background:rgba(255,245,247,.99);border-color:rgba(225,29,72,.18);}
+:root[data-theme="light"] .cdd-menu.is-reason .cdd-opt{color:#555a80;}
+:root[data-theme="light"] .cdd-menu.is-reason .cdd-opt:hover{background:rgba(225,29,72,.1);color:#be123c;}
+:root[data-theme="light"] .cdd-menu.is-reason .cdd-opt.selected{color:#be123c;}
 
 /* Btn active ripple */
 @keyframes ripple{
@@ -867,14 +874,18 @@ header{
   <!-- Session -->
   <div class="card session-panel">
     <span class="sp-label">Session Type</span>
-    <div class="sel-shell">
-      <select class="session-select" id="sessionSelect">
-        <option value="Fallin">Fallin</option>
-        <option value="Lecture">Lecture</option>
-        <option value="Event">Event</option>
-        <option value="Parade">Parade</option>
-        <option value="Activity">Activity</option>
-      </select>
+    <div class="cdd cdd-session" id="sessionDD">
+      <div class="cdd-trigger" id="sessionTrigger">
+        <span id="sessionVal">Fallin</span>
+        <span class="cdd-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 4 6 8 10 4"/></svg></span>
+      </div>
+      <div class="cdd-menu" id="sessionMenu">
+        <div class="cdd-opt selected" data-val="Fallin"><svg class="cdd-check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3.5"/></svg>Fallin</div>
+        <div class="cdd-opt" data-val="Lecture"><svg class="cdd-check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3.5"/></svg>Lecture</div>
+        <div class="cdd-opt" data-val="Event"><svg class="cdd-check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3.5"/></svg>Event</div>
+        <div class="cdd-opt" data-val="Parade"><svg class="cdd-check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3.5"/></svg>Parade</div>
+        <div class="cdd-opt" data-val="Activity"><svg class="cdd-check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3.5"/></svg>Activity</div>
+      </div>
     </div>
     <p class="sp-hint">Output line: <em id="sessionHint">Attendance of Today's Fallin:</em></p>
   </div>
@@ -941,25 +952,97 @@ function getDate(){
   return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
-const sessionSel=document.getElementById('sessionSelect');
-const sessionHint=document.getElementById('sessionHint');
-function refreshHint(){sessionHint.textContent=`Attendance of Today's ${sessionSel.value}:`;}
-sessionSel.addEventListener('change',refreshHint);
+/* ── Custom dropdown factory ── */
+function makeDropdown(ddEl, onChange){
+  const trigger = ddEl.querySelector('.cdd-trigger');
+  const valEl   = trigger.querySelector('span');
+  const menu    = ddEl.querySelector('.cdd-menu');
+  const opts    = ddEl.querySelectorAll('.cdd-opt');
+
+  let value = ddEl.querySelector('.cdd-opt.selected')?.dataset.val || opts[0]?.dataset.val;
+
+  /* Teleport menu to <body> so backdrop-filter ancestors can't corrupt
+     position:fixed coordinate space */
+  if(ddEl.classList.contains('cdd-session')) menu.classList.add('is-session');
+  if(ddEl.classList.contains('cdd-reason'))  menu.classList.add('is-reason');
+  document.body.appendChild(menu);
+
+  function positionMenu(){
+    const r = trigger.getBoundingClientRect();
+    menu.style.top   = (r.bottom + 6) + 'px';
+    menu.style.left  = r.left + 'px';
+    menu.style.width = r.width + 'px';
+  }
+
+  function open(){
+    /* Close any other open menus first */
+    document.querySelectorAll('.cdd-menu.menu-open').forEach(m=>m.classList.remove('menu-open'));
+    document.querySelectorAll('.cdd.open').forEach(d=>d.classList.remove('open'));
+    positionMenu();
+    ddEl.classList.add('open');
+    menu.classList.add('menu-open');
+  }
+  function close(){
+    ddEl.classList.remove('open');
+    menu.classList.remove('menu-open');
+  }
+  function toggle(){ ddEl.classList.contains('open') ? close() : open(); }
+
+  trigger.addEventListener('click', e=>{ e.stopPropagation(); toggle(); });
+
+  opts.forEach(opt=>{
+    opt.addEventListener('click', e=>{
+      e.stopPropagation();
+      value = opt.dataset.val;
+      opts.forEach(o=>o.classList.remove('selected'));
+      opt.classList.add('selected');
+      valEl.textContent = value;
+      close();
+      if(onChange) onChange(value);
+    });
+  });
+
+  /* Close on outside click — menu is now in body so stopPropagation on
+     trigger/opts prevents this from firing on those interactions */
+  document.addEventListener('click', ()=>close());
+
+  /* Reposition on scroll */
+  window.addEventListener('scroll', ()=>{
+    if(ddEl.classList.contains('open')) positionMenu();
+  }, true);
+
+  return {
+    getValue(){ return value; },
+    destroy(){ menu.remove(); }
+  };
+}
+
+const sessionDD  = makeDropdown(document.getElementById('sessionDD'), ()=>refreshHint());
+const sessionHint = document.getElementById('sessionHint');
+function refreshHint(){ sessionHint.textContent=`Attendance of Today's ${sessionDD.getValue()}:`; }
 refreshHint();
 
 /* ── Build the reason-row HTML ── */
+const CHECK_SVG=`<svg class="cdd-check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3.5"/></svg>`;
+const ARROW_SVG=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 4 6 8 10 4"/></svg>`;
+
 function reasonHTML(reason){
   return`<div class="reason-drop">
     <label>Reason</label>
-    <select class="reason-sel">
-      <option value="Unapproved"${reason==='Unapproved'?' selected':''}>Unapproved</option>
-      <option value="Approved"${reason==='Approved'?' selected':''}>Approved</option>
-    </select>
+    <div class="cdd cdd-reason">
+      <div class="cdd-trigger"><span>${reason}</span><span class="cdd-arrow">${ARROW_SVG}</span></div>
+      <div class="cdd-menu">
+        <div class="cdd-opt${reason==='Unapproved'?' selected':''}" data-val="Unapproved">${CHECK_SVG}Unapproved</div>
+        <div class="cdd-opt${reason==='Approved'?' selected':''}" data-val="Approved">${CHECK_SVG}Approved</div>
+      </div>
+    </div>
   </div>`;
 }
 
 /* ── Initial full render (called once on load + on reset) ── */
 function render(){
+  /* Remove only reason menus teleported to body from previous render */
+  document.querySelectorAll('body>.cdd-menu.is-reason').forEach(m=>m.remove());
   const list=document.getElementById('cadetsList');
   list.innerHTML='';
   CADETS.forEach((name,i)=>{
@@ -998,11 +1081,10 @@ function bindCardEvents(list){
   list.querySelectorAll('.pcb').forEach(cb=>{
     cb.addEventListener('change',e=>toggleCadet(+e.target.dataset.idx, e.target.checked));
   });
-  list.querySelectorAll('.reason-sel').forEach(s=>{
-    s.addEventListener('change',e=>{
-      const card=e.target.closest('.cadet-card');
-      state[+card.dataset.idx].reason=e.target.value;
-    });
+  list.querySelectorAll('.cdd-reason').forEach(ddEl=>{
+    const card = ddEl.closest('.cadet-card');
+    const idx  = +card.dataset.idx;
+    makeDropdown(ddEl, val=>{ state[idx].reason=val; });
   });
 }
 
@@ -1026,23 +1108,23 @@ function toggleCadet(idx, present){
   /* 3. Show/hide reason dropdown with animation */
   const existingDrop=card.querySelector('.reason-drop');
   if(!present && !existingDrop){
-    /* Adding absent reason — animate in */
     const drop=document.createElement('div');
     drop.className='reason-drop';
     drop.innerHTML=`<label>Reason</label>
-      <select class="reason-sel">
-        <option value="Unapproved" selected>Unapproved</option>
-        <option value="Approved">Approved</option>
-      </select>`;
-    /* Reset reason state to default when toggled absent */
+      <div class="cdd cdd-reason">
+        <div class="cdd-trigger"><span>Unapproved</span><span class="cdd-arrow">${ARROW_SVG}</span></div>
+        <div class="cdd-menu">
+          <div class="cdd-opt selected" data-val="Unapproved">${CHECK_SVG}Unapproved</div>
+          <div class="cdd-opt" data-val="Approved">${CHECK_SVG}Approved</div>
+        </div>
+      </div>`;
     state[idx].reason='Unapproved';
     card.appendChild(drop);
-    /* Bind reason change for this new dropdown */
-    drop.querySelector('.reason-sel').addEventListener('change',e=>{
-      state[idx].reason=e.target.value;
-    });
+    const ddInst = makeDropdown(drop.querySelector('.cdd-reason'), val=>{ state[idx].reason=val; });
+    drop._ddInst = ddInst;
   } else if(present && existingDrop){
-    /* Removing reason — animate out then remove */
+    /* Destroy teleported menu before removing drop */
+    if(existingDrop._ddInst) existingDrop._ddInst.destroy();
     existingDrop.style.transition='opacity .25s ease, transform .25s ease';
     existingDrop.style.opacity='0';
     existingDrop.style.transform='translateY(-6px)';
@@ -1053,19 +1135,20 @@ function toggleCadet(idx, present){
 }
 
 function animNum(el,v){
+  if(el.textContent===String(v))return;
   el.textContent=v;
-  el.animate([{transform:'scale(1.3)',opacity:.5},{transform:'scale(1)',opacity:1}],
-    {duration:300,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  el.animate([{transform:'scale(1.15)',opacity:.6},{transform:'scale(1)',opacity:1}],
+    {duration:280,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'forwards'});
 }
 function updateStats(){
   const t=CADETS.length,p=state.filter(s=>s.present).length;
-  animNum(document.getElementById('statTotal'),t);
+  document.getElementById('statTotal').textContent=t;
   animNum(document.getElementById('statPresent'),p);
   animNum(document.getElementById('statAbsent'),t-p);
 }
 
 function generateText(){
-  const session=sessionSel.value,date=getDate();
+  const session=sessionDD.getValue(),date=getDate();
   const present=CADETS.map((name,i)=>({name,...state[i]})).filter(c=>c.present);
   const absent=CADETS.map((name,i)=>({name,...state[i]})).filter(c=>!c.present)
     .sort((a,b)=>{
@@ -1074,13 +1157,14 @@ function generateText(){
       return 0;
     });
   let t=`Jai Hind Sir\n`;
-  t+=`Attendance of Today's ${session}:\n`;
-  t+=`Date: ${date}\n`;
+  t+=`\nAttendance of Today's ${session}:\n`;
+  t+=`\nDate: ${date}\n`;
   if(present.length>0)present.forEach((c,i)=>{t+=`\n${i+1}. Cdt. ${c.name}\n`;});
   else t+=`\n(No cadets present)\n`;
-  t+=`\nAbsent Cadets-\n`;
-  if(absent.length===0)t+=`\n(None)\n`;
-  else absent.forEach((c,i)=>{t+=`\n${i+1}. Cdt. ${c.name} (${c.reason})\n`;});
+  if(absent.length>0){
+    t+=`\nAbsent Cadets:\n`;
+    absent.forEach((c,i)=>{t+=`\n${i+1}. Cdt. ${c.name} (${c.reason})\n`;});
+  }
   t+=`\nJai Hind Sir`;
   return t;
 }
@@ -1095,6 +1179,10 @@ document.getElementById('generateBtn').addEventListener('click',()=>{
   btn.style.display='block';
   btn.textContent='Copy to Clipboard';
   btn.classList.remove('copied');
+  /* Re-trigger fade animation */
+  box.classList.remove('has-content');
+  void box.offsetWidth;
+  box.classList.add('has-content');
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
 });
 
@@ -1173,15 +1261,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   });
 });
 
-/* ── Preview body content-fade on generate ── */
-const _origGenClick=document.getElementById('generateBtn').onclick;
-document.getElementById('generateBtn').addEventListener('click',()=>{
-  const box=document.getElementById('previewBox');
-  /* Re-trigger animation by removing and re-adding class */
-  box.classList.remove('has-content');
-  void box.offsetWidth; /* reflow */
-  box.classList.add('has-content');
-});
+
 </script>
 </body>
 </html>
